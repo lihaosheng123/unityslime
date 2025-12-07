@@ -29,6 +29,12 @@ namespace Slime
             _vertPos = new NativeArray<int3>(MarchingCubesTables.VertPos, Allocator.Persistent);
             _mesh = new Mesh();
             _mesh.indexFormat = IndexFormat.UInt32;
+
+            // 验证表格大小
+            Debug.Assert(_triangleConnectionTable.Length == 4096,
+                $"[LMarchingCubes] TriangleConnectionTable size mismatch: {_triangleConnectionTable.Length} != 4096");
+            Debug.Assert(_triangleVertCountTable.Length == 256,
+                $"[LMarchingCubes] TriangleVertCountTable size mismatch: {_triangleVertCountTable.Length} != 256");
         }
 
         public void Dispose()
@@ -40,7 +46,7 @@ namespace Slime
             _vertPos.Dispose();
             Object.Destroy(_mesh);
         }
-        
+
         public Mesh MarchingCubes(NativeArray<int3> keys, NativeHashMap<int3, int> gridLut, NativeArray<float> grid, float threshold, float scale = 1)
         {
             var vertices = new NativeList<float3>(_lastVertexCount + 512, Allocator.TempJob);
@@ -60,7 +66,7 @@ namespace Slime
                 Threshold = threshold,
                 Scale = scale,
             }.Schedule().Complete();
-            
+
             var mesh = _mesh;
             if (vertices.Length > _lastVertexCount)
             {
@@ -76,12 +82,12 @@ namespace Slime
             }
             mesh.RecalculateBounds();
             mesh.UploadMeshData(false);
-            
+
             _lastVertexCount = vertices.Length;
             vertices.Dispose();
             normals.Dispose();
             triangles.Dispose();
-            
+
             return mesh;
         }
 
@@ -109,7 +115,7 @@ namespace Slime
             var vertices = new NativeArray<float3>(totalVertCount, Allocator.TempJob);
             var normals = new NativeArray<float3>(totalVertCount, Allocator.TempJob);
             var triangles = new NativeArray<int>(totalVertCount, Allocator.TempJob);
-            
+
             new MarchingCubesParallelJobs
             {
                 TriangleConnectionTable = _triangleConnectionTable,
@@ -125,7 +131,7 @@ namespace Slime
                 Threshold = threshold,
                 Scale = scale,
             }.Schedule(keys.Length, 32).Complete();
-            
+
             var mesh = _mesh;
             if (vertices.Length > _lastVertexCount)
             {
@@ -141,13 +147,13 @@ namespace Slime
             }
             mesh.RecalculateBounds();
             mesh.UploadMeshData(false);
-            
+
             _lastVertexCount = vertices.Length;
             vertices.Dispose();
             normals.Dispose();
             triangles.Dispose();
             blockVertCount.Dispose();
-            
+
             return mesh;
         }
 
@@ -156,13 +162,13 @@ namespace Slime
         {
             [ReadOnly] public NativeArray<int> TriangleVertCountTable;
             [ReadOnly] public NativeArray<int3> VertPos;
-            
+
             [ReadOnly] public NativeArray<int3> Keys;
             [ReadOnly] public NativeHashMap<int3, int> GridLut;
             [ReadOnly] public NativeArray<float> Grid;
-            
+
             [WriteOnly] public NativeArray<int> BlockVertCount;
-            
+
             public float Threshold;
 
             public void Execute(int index)
@@ -170,54 +176,54 @@ namespace Slime
                 float* block = stackalloc float[8 * 8 * 8];
 
                 int3 key = Keys[index];
-                
+
                 for (int z = 0; z < 8; z++)
-                for (int y = 0; y < 8; y++)
-                for (int x = 0; x < 8; x++)
-                    block[GetBlockIndex(new int3(x, y, z))] = 0;
+                    for (int y = 0; y < 8; y++)
+                        for (int x = 0; x < 8; x++)
+                            block[GetBlockIndex(new int3(x, y, z))] = 0;
 
                 int3 minCoord = (key << 2) - 2;
                 for (int dz = -1; dz <= 1; ++dz)
-                for (int dy = -1; dy <= 1; ++dy)
-                for (int dx = -1; dx <= 1; ++dx)
-                {
-                    int3 nKey = key + new int3(dx, dy, dz);
-                    if (!GridLut.ContainsKey(nKey)) continue;
+                    for (int dy = -1; dy <= 1; ++dy)
+                        for (int dx = -1; dx <= 1; ++dx)
+                        {
+                            int3 nKey = key + new int3(dx, dy, dz);
+                            if (!GridLut.ContainsKey(nKey)) continue;
 
-                    int nOff = GridLut[nKey];
-                    for (int j = 0; j < 64; j++)
-                    {
-                        int3 coord = (nKey * 4) + GetLocalCoord(j) - minCoord;
-                        if (math.any(coord < 0) || math.any(coord >= 8))
-                            continue;
-                        block[GetBlockIndex(coord)] = Grid[nOff + j];
-                    }
-                }
+                            int nOff = GridLut[nKey];
+                            for (int j = 0; j < 64; j++)
+                            {
+                                int3 coord = (nKey * 4) + GetLocalCoord(j) - minCoord;
+                                if (math.any(coord < 0) || math.any(coord >= 8))
+                                    continue;
+                                block[GetBlockIndex(coord)] = Grid[nOff + j];
+                            }
+                        }
 
                 int vertCount = 0;
                 for (int z = 1; z < 6; z++)
-                for (int y = 1; y < 6; y++)
-                for (int x = 1; x < 6; x++)
-                {
-                    var result = 0;
-                    int3 localCoord = new int3(x, y, z);
-                    int3 coord = localCoord + minCoord;
-                    int3 nKey = coord >> 2;
-                    if ((math.any(localCoord < 2) || math.any(localCoord > 5)) && GridLut.ContainsKey(nKey))
-                        continue;
+                    for (int y = 1; y < 6; y++)
+                        for (int x = 1; x < 6; x++)
+                        {
+                            var result = 0;
+                            int3 localCoord = new int3(x, y, z);
+                            int3 coord = localCoord + minCoord;
+                            int3 nKey = coord >> 2;
+                            if ((math.any(localCoord < 2) || math.any(localCoord > 5)) && GridLut.ContainsKey(nKey))
+                                continue;
 
-                    for (int i = 0; i < 8; i++)
-                    {
-                        if (ReadGrid(localCoord + VertPos[i], block) > Threshold)
-                            result |= 1 << i;
-                    }
-                    
-                    vertCount += TriangleVertCountTable[result];
-                }
-                
+                            for (int i = 0; i < 8; i++)
+                            {
+                                if (ReadGrid(localCoord + VertPos[i], block) > Threshold)
+                                    result |= 1 << i;
+                            }
+
+                            vertCount += TriangleVertCountTable[result];
+                        }
+
                 BlockVertCount[index] = vertCount;
             }
-            
+
             private static float ReadGrid(int3 coord, float* block)
             {
                 coord = math.clamp(coord, 0, 7);
@@ -228,7 +234,7 @@ namespace Slime
             {
                 return new int3(index & 3, (index >> 2) & 3, (index >> 4) & 3);
             }
-            
+
             private static int GetBlockIndex(int3 coord)
             {
                 return coord.x + 8 * (coord.y + 8 * coord.z);
@@ -239,7 +245,7 @@ namespace Slime
         private struct PrefixSum : IJob
         {
             public NativeArray<int> BlockVertCount;
-            
+
             public void Execute()
             {
                 int sum = 0;
@@ -251,22 +257,22 @@ namespace Slime
                 }
             }
         }
-        
+
         [BurstCompile]
         private unsafe struct MarchingCubesJobs : IJob
         {
             [ReadOnly] public NativeArray<int> TriangleConnectionTable;
             [ReadOnly] public NativeArray<int2> EdgeVert;
             [ReadOnly] public NativeArray<int3> VertPos;
-            
+
             [ReadOnly] public NativeArray<int3> Keys;
             [ReadOnly] public NativeHashMap<int3, int> GridLut;
             [ReadOnly] public NativeArray<float> Grid;
-            
+
             public NativeList<float3> Vertices;
             public NativeList<float3> Normals;
             public NativeList<int> Triangles;
-            
+
             public float Threshold;
             public float Scale;
 
@@ -282,68 +288,68 @@ namespace Slime
 
                     int3 minCoord = (key << 2) - 2;
                     for (int dz = -1; dz <= 1; ++dz)
-                    for (int dy = -1; dy <= 1; ++dy)
-                    for (int dx = -1; dx <= 1; ++dx)
-                    {
-                        int3 nKey = key + new int3(dx, dy, dz);
-                        if (!GridLut.ContainsKey(nKey)) continue;
+                        for (int dy = -1; dy <= 1; ++dy)
+                            for (int dx = -1; dx <= 1; ++dx)
+                            {
+                                int3 nKey = key + new int3(dx, dy, dz);
+                                if (!GridLut.ContainsKey(nKey)) continue;
 
-                        int nOff = GridLut[nKey];
-                        for (int j = 0; j < 64; j++)
-                        {
-                            int3 coord = (nKey * 4) + GetLocalCoord(j) - minCoord;
-                            if (math.any(coord < 0) || math.any(coord >= 8))
-                                continue;
+                                int nOff = GridLut[nKey];
+                                for (int j = 0; j < 64; j++)
+                                {
+                                    int3 coord = (nKey * 4) + GetLocalCoord(j) - minCoord;
+                                    if (math.any(coord < 0) || math.any(coord >= 8))
+                                        continue;
 
-                            block[GetBlockIndex(coord)] = Grid[nOff + j];
-                        }
-                    }
+                                    block[GetBlockIndex(coord)] = Grid[nOff + j];
+                                }
+                            }
 
                     for (int z = 1; z < 6; z++)
-                    for (int y = 1; y < 6; y++)
-                    for (int x = 1; x < 6; x++)
-                    {
-                        var result = 0;
-                        int3 localCoord = new int3(x, y, z);
-                        int3 coord = localCoord + minCoord;
-                        int3 nKey = coord >> 2;
-                        if ((math.any(localCoord < 2) || math.any(localCoord > 5)) && GridLut.ContainsKey(nKey))
-                            continue;
-
-                        for (int i = 0; i < 8; i++)
-                        {
-                            weights[i] = ReadGrid(localCoord + VertPos[i], block);
-                            if (weights[i] > Threshold) result |= 1 << i;
-                        }
-
-                        if (result < 1) continue;
-
-                        var line = new NativeSlice<int>(TriangleConnectionTable, result * 16, 16);
-                        if (line[0] < 0) continue;
-                        for (int i = 0; line[i] > -1 && i < 15; i += 3)
-                        {
-                            indices[0] = line[i];
-                            indices[1] = line[i + 2];
-                            indices[2] = line[i + 1];
-
-                            for (int j = 0; j < 3; j++)
+                        for (int y = 1; y < 6; y++)
+                            for (int x = 1; x < 6; x++)
                             {
-                                int2 ev = EdgeVert[indices[j]];
-                                int3 v0 = VertPos[ev.x] + coord;
-                                int3 v1 = VertPos[ev.y] + coord;
-                                float weight = (Threshold - weights[ev.x]) / (weights[ev.y] - weights[ev.x]);
-                                int id = Vertices.Length;
-                                float3 pos = math.lerp(v0, v1, weight);
-                                float3 normal = CalcNormal(pos - minCoord, block);
-                                Vertices.Add(pos * Scale);
-                                Normals.Add(normal);
-                                Triangles.Add(id);
+                                var result = 0;
+                                int3 localCoord = new int3(x, y, z);
+                                int3 coord = localCoord + minCoord;
+                                int3 nKey = coord >> 2;
+                                if ((math.any(localCoord < 2) || math.any(localCoord > 5)) && GridLut.ContainsKey(nKey))
+                                    continue;
+
+                                for (int i = 0; i < 8; i++)
+                                {
+                                    weights[i] = ReadGrid(localCoord + VertPos[i], block);
+                                    if (weights[i] > Threshold) result |= 1 << i;
+                                }
+
+                                if (result < 1) continue;
+
+                                var line = new NativeSlice<int>(TriangleConnectionTable, result * 16, 16);
+                                if (line[0] < 0) continue;
+                                for (int i = 0; line[i] > -1 && i < 15; i += 3)
+                                {
+                                    indices[0] = line[i];
+                                    indices[1] = line[i + 2];
+                                    indices[2] = line[i + 1];
+
+                                    for (int j = 0; j < 3; j++)
+                                    {
+                                        int2 ev = EdgeVert[indices[j]];
+                                        int3 v0 = VertPos[ev.x] + coord;
+                                        int3 v1 = VertPos[ev.y] + coord;
+                                        float weight = (Threshold - weights[ev.x]) / (weights[ev.y] - weights[ev.x]);
+                                        int id = Vertices.Length;
+                                        float3 pos = math.lerp(v0, v1, weight);
+                                        float3 normal = CalcNormal(pos - minCoord, block);
+                                        Vertices.Add(pos * Scale);
+                                        Normals.Add(normal);
+                                        Triangles.Add(id);
+                                    }
+                                }
                             }
-                        }
-                    }
                 }
             }
-            
+
             private static float ReadGrid(int3 coord, float* block)
             {
                 coord = math.clamp(coord, 0, 7);
@@ -354,7 +360,7 @@ namespace Slime
             {
                 return new int3(index & 3, (index >> 2) & 3, (index >> 4) & 3);
             }
-            
+
             private static int GetBlockIndex(int3 coord)
             {
                 return coord.x + 8 * (coord.y + 8 * coord.z);
@@ -391,100 +397,100 @@ namespace Slime
                 return math.lerp(c0, c1, f.z);
             }
         }
-        
+
         [BurstCompile]
         private unsafe struct MarchingCubesParallelJobs : IJobParallelFor
         {
             [ReadOnly] public NativeArray<int> TriangleConnectionTable;
             [ReadOnly] public NativeArray<int2> EdgeVert;
             [ReadOnly] public NativeArray<int3> VertPos;
-            
+
             [ReadOnly] public NativeArray<int3> Keys;
             [ReadOnly] public NativeHashMap<int3, int> GridLut;
             [ReadOnly] public NativeArray<float> Grid;
             [ReadOnly] public NativeArray<int> BlockVertPrefixSum;
-            
+
             [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<float3> Vertices;
             [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<float3> Normals;
             [WriteOnly, NativeDisableParallelForRestriction] public NativeArray<int> Triangles;
-            
+
             public float Threshold;
             public float Scale;
 
             public void Execute(int index)
             {
                 var key = Keys[index];
-                    
+
                 float* weights = stackalloc float[8];
                 int* indices = stackalloc int[3];
                 float* block = stackalloc float[8 * 8 * 8];
-                
+
                 UnsafeUtility.MemClear(block, 8 * 8 * 8 * sizeof(float));
 
                 int3 minCoord = (key << 2) - 2;
                 for (int dz = -1; dz <= 1; ++dz)
-                for (int dy = -1; dy <= 1; ++dy)
-                for (int dx = -1; dx <= 1; ++dx)
-                {
-                    int3 nKey = key + new int3(dx, dy, dz);
-                    if (!GridLut.ContainsKey(nKey)) continue;
+                    for (int dy = -1; dy <= 1; ++dy)
+                        for (int dx = -1; dx <= 1; ++dx)
+                        {
+                            int3 nKey = key + new int3(dx, dy, dz);
+                            if (!GridLut.ContainsKey(nKey)) continue;
 
-                    int nOff = GridLut[nKey];
-                    for (int j = 0; j < 64; j++)
-                    {
-                        int3 coord = (nKey * 4) + GetLocalCoord(j) - minCoord;
-                        if (math.any(coord < 0) || math.any(coord >= 8))
-                            continue;
+                            int nOff = GridLut[nKey];
+                            for (int j = 0; j < 64; j++)
+                            {
+                                int3 coord = (nKey * 4) + GetLocalCoord(j) - minCoord;
+                                if (math.any(coord < 0) || math.any(coord >= 8))
+                                    continue;
 
-                        block[GetBlockIndex(coord)] = Grid[nOff + j];
-                    }
-                }
+                                block[GetBlockIndex(coord)] = Grid[nOff + j];
+                            }
+                        }
 
                 int offset = BlockVertPrefixSum[index];
                 for (int z = 1; z < 6; z++)
-                for (int y = 1; y < 6; y++)
-                for (int x = 1; x < 6; x++)
-                {
-                    var result = 0;
-                    int3 localCoord = new int3(x, y, z);
-                    int3 coord = localCoord + minCoord;
-                    int3 nKey = coord >> 2;
-                    if ((math.any(localCoord < 2) || math.any(localCoord > 5)) && GridLut.ContainsKey(nKey))
-                        continue;
-
-                    for (int i = 0; i < 8; i++)
-                    {
-                        weights[i] = ReadGrid(localCoord + VertPos[i], block);
-                        if (weights[i] > Threshold) result |= 1 << i;
-                    }
-                    
-                    var line = TriangleConnectionTable.Slice(result * 16, 16);
-                    
-                    if (line[0] < 0) continue;
-                    
-                    for (int i = 0; line[i] > -1 && i < 15; i += 3)
-                    {
-                        indices[0] = line[i];
-                        indices[1] = line[i + 2];
-                        indices[2] = line[i + 1];
-
-                        for (int j = 0; j < 3; j++)
+                    for (int y = 1; y < 6; y++)
+                        for (int x = 1; x < 6; x++)
                         {
-                            int2 ev = EdgeVert[indices[j]];
-                            int3 v0 = VertPos[ev.x] + coord;
-                            int3 v1 = VertPos[ev.y] + coord;
-                            float weight = (Threshold - weights[ev.x]) / (weights[ev.y] - weights[ev.x]);
-                            float3 pos = math.lerp(v0, v1, weight);
-                            float3 normal = CalcNormal(pos - minCoord, block);
-                            Vertices[offset] = (pos * Scale);
-                            Normals[offset] = (normal);
-                            Triangles[offset] = offset;
-                            offset++;
+                            var result = 0;
+                            int3 localCoord = new int3(x, y, z);
+                            int3 coord = localCoord + minCoord;
+                            int3 nKey = coord >> 2;
+                            if ((math.any(localCoord < 2) || math.any(localCoord > 5)) && GridLut.ContainsKey(nKey))
+                                continue;
+
+                            for (int i = 0; i < 8; i++)
+                            {
+                                weights[i] = ReadGrid(localCoord + VertPos[i], block);
+                                if (weights[i] > Threshold) result |= 1 << i;
+                            }
+
+                            var line = TriangleConnectionTable.Slice(result * 16, 16);
+
+                            if (line[0] < 0) continue;
+
+                            for (int i = 0; line[i] > -1 && i < 15; i += 3)
+                            {
+                                indices[0] = line[i];
+                                indices[1] = line[i + 2];
+                                indices[2] = line[i + 1];
+
+                                for (int j = 0; j < 3; j++)
+                                {
+                                    int2 ev = EdgeVert[indices[j]];
+                                    int3 v0 = VertPos[ev.x] + coord;
+                                    int3 v1 = VertPos[ev.y] + coord;
+                                    float weight = (Threshold - weights[ev.x]) / (weights[ev.y] - weights[ev.x]);
+                                    float3 pos = math.lerp(v0, v1, weight);
+                                    float3 normal = CalcNormal(pos - minCoord, block);
+                                    Vertices[offset] = (pos * Scale);
+                                    Normals[offset] = (normal);
+                                    Triangles[offset] = offset;
+                                    offset++;
+                                }
+                            }
                         }
-                    }
-                }
             }
-            
+
             private static float ReadGrid(int3 coord, float* block)
             {
                 coord = math.clamp(coord, 0, 7);
@@ -495,7 +501,7 @@ namespace Slime
             {
                 return new int3(index & 3, (index >> 2) & 3, (index >> 4) & 3);
             }
-            
+
             private static int GetBlockIndex(int3 coord)
             {
                 return coord.x + 8 * (coord.y + 8 * coord.z);
@@ -817,7 +823,7 @@ namespace Slime
             new [] {9, 0, 1, 5, 10, 3, 5, 3, 7, 3, 10, 2, -1, -1, -1, -1},
             new [] {9, 8, 2, 9, 2, 1, 8, 7, 2, 10, 2, 5, 7, 5, 2, -1},
             new [] {1, 3, 5, 3, 7, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-            new [] {0, 8, 7, 0, 7, 1, 1, 7, 5, -1, -1, -1, -1, -1, -1, -1},
+            new [] {0, 7, 8, 0, 7, 1, 1, 7, 5, -1, -1, -1, -1, -1, -1, -1},
             new [] {9, 0, 3, 9, 3, 5, 5, 3, 7, -1, -1, -1, -1, -1, -1, -1},
             new [] {9, 8, 7, 5, 9, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
             new [] {5, 8, 4, 5, 10, 8, 10, 11, 8, -1, -1, -1, -1, -1, -1, -1},

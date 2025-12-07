@@ -23,12 +23,12 @@ namespace Slime
         {
             var controlledRb = _rb;
             var velocity = speed * new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")).normalized;
-            velocity.y = controlledRb.velocity.y;
+            velocity.y = controlledRb.linearVelocity.y;
         
             if (Input.GetKeyDown(KeyCode.Space))
                 velocity += new Vector3(0, 4, 0);
         
-            controlledRb.velocity = velocity;
+            controlledRb.linearVelocity = velocity;
         }
     }
 }
