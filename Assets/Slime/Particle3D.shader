@@ -5,6 +5,8 @@
     Properties {
         _Color ("Color", Color) = (1, 1, 1, 1)
         _Size ("Size", float) = 0.035
+        [Toggle] _UseToon ("Use Toon Shading", Float) = 0
+        _ToonIntensity ("Toon Effect Intensity", Range(0, 1)) = 1.0
     }
 
     SubShader {
@@ -24,6 +26,7 @@
 
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile _ _USETOON_ON
 
             #pragma enable_d3d11_debug_symbols
             
@@ -44,14 +47,23 @@
                 float4 pos : SV_POSITION;
                 float4 uv : TEXCOORD0; // xyz = 粒子世界位置(未乘尺度)，w = 粒子 ID
                 float3 normal : TEXCOORD1;
+                float3 worldPos : TEXCOORD2;
             };
 
             float _Size;          // 粒子网格放缩
             float4 _Color;        // 默认颜色
             int _Aniso;           // >0 时使用协方差矩阵实现各向异性缩放
+            float _ToonIntensity; // 卡通效果强度
 
             StructuredBuffer<Particle> _ParticleBuffer;      // 粒子数据
             StructuredBuffer<float4x4> _CovarianceBuffer;    // 各向异性矩阵 (由 CPU 端 Reconstruction 计算)
+
+            // 卡通化光照 - 阶梯式明暗
+            float ToonRamp(float lightIntensity, float steps)
+            {
+                float step = 1.0 / steps;
+                return floor(lightIntensity / step) * step;
+            }
 
             v2f vert (a2v v, uint id : SV_InstanceID) 
             {
@@ -65,6 +77,7 @@
                 // 投影到裁剪空间
                 o.pos = TransformWorldToHClip(worldPosition);
                 o.normal = TransformObjectToWorldNormal(v.normal);
+                o.worldPos = worldPosition;
                 o.uv = float4(_ParticleBuffer[id].x, _ParticleBuffer[id].ID);
                 
                 return o;
@@ -84,11 +97,32 @@
             float4 frag (v2f i) : SV_Target 
             {
                 // 主光方向 + 球谐环境光混合
-                float NoL = max(0, dot(GetMainLight().direction, i.normal));
+                float3 L = GetMainLight().direction;
+                float3 V = normalize(_WorldSpaceCameraPos - i.worldPos);
+                float NoL = max(0, dot(L, i.normal));
                 float3 sh = SampleSH(i.normal);
+                
                 int id = round(i.uv.w); // 粒子 ID
                 float4 color = id > -0.5 ?  colors[((uint)id) & 7] : _Color;
-                return float4(color.rgb*(NoL.xxx + sh), 1);
+                
+                #ifdef _USETOON_ON
+                    // 卡通化光照
+                    float toonNdotL = ToonRamp(NoL, 3.0); // 3 级明暗
+                    float3 toonShading = color.rgb * (toonNdotL + sh * 0.5);
+                    
+                    // 边缘光（Rim Light）
+                    float rim = pow(1.0 - max(0, dot(i.normal, V)), 3.0);
+                    float3 rimColor = float3(0.5, 1.0, 1.0) * rim * 0.5;
+                    
+                    // 混合原始光照和卡通光照
+                    float3 originalShading = color.rgb * (NoL + sh);
+                    float3 finalColor = lerp(originalShading, toonShading + rimColor, _ToonIntensity);
+                    
+                    return float4(finalColor, 1);
+                #else
+                    // 原始光照
+                    return float4(color.rgb*(NoL.xxx + sh), 1);
+                #endif
             }
 
             ENDHLSL
