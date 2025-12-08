@@ -11,7 +11,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.collab-proxy": {
+<<<<<<< HEAD
       "version": "2.10.2",
+=======
+      "version": "2.10.0",
+>>>>>>> 2027e00b4fc6766ba62579183c67c0c920c56d79
       "depth": 0,
       "source": "registry",
       "dependencies": {},
@@ -55,25 +59,38 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.mathematics": {
+<<<<<<< HEAD
       "version": "1.3.3",
+=======
+      "version": "1.3.2",
+>>>>>>> 2027e00b4fc6766ba62579183c67c0c920c56d79
       "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.nuget.mono-cecil": {
+<<<<<<< HEAD
       "version": "1.11.6",
+=======
+      "version": "1.11.5",
+>>>>>>> 2027e00b4fc6766ba62579183c67c0c920c56d79
       "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.render-pipelines.core": {
+<<<<<<< HEAD
       "version": "17.3.0",
       "depth": 0,
+=======
+      "version": "17.0.4",
+      "depth": 1,
+>>>>>>> 2027e00b4fc6766ba62579183c67c0c920c56d79
       "source": "builtin",
       "dependencies": {
-        "com.unity.burst": "1.8.14",
+        "com.unity.burst": "1.8.20",
         "com.unity.mathematics": "1.3.2",
         "com.unity.ugui": "2.0.0",
         "com.unity.collections": "2.4.3",
@@ -83,12 +100,21 @@
       }
     },
     "com.unity.render-pipelines.universal": {
+<<<<<<< HEAD
       "version": "17.3.0",
       "depth": 0,
       "source": "builtin",
       "dependencies": {
         "com.unity.render-pipelines.core": "17.3.0",
         "com.unity.shadergraph": "17.3.0",
+=======
+      "version": "17.0.4",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.render-pipelines.core": "17.0.4",
+        "com.unity.shadergraph": "17.0.4",
+>>>>>>> 2027e00b4fc6766ba62579183c67c0c920c56d79
         "com.unity.render-pipelines.universal-config": "17.0.3"
       }
     },
@@ -101,18 +127,31 @@
       }
     },
     "com.unity.searcher": {
+<<<<<<< HEAD
       "version": "4.9.4",
       "depth": 1,
+=======
+      "version": "4.9.3",
+      "depth": 2,
+>>>>>>> 2027e00b4fc6766ba62579183c67c0c920c56d79
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
     "com.unity.shadergraph": {
+<<<<<<< HEAD
       "version": "17.3.0",
       "depth": 0,
       "source": "builtin",
       "dependencies": {
         "com.unity.render-pipelines.core": "17.3.0",
+=======
+      "version": "17.0.4",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.render-pipelines.core": "17.0.4",
+>>>>>>> 2027e00b4fc6766ba62579183c67c0c920c56d79
         "com.unity.searcher": "4.9.3"
       }
     },
@@ -158,7 +197,11 @@
       }
     },
     "com.unity.visualscripting": {
+<<<<<<< HEAD
       "version": "1.9.9",
+=======
+      "version": "1.9.7",
+>>>>>>> 2027e00b4fc6766ba62579183c67c0c920c56d79
       "depth": 0,
       "source": "registry",
       "dependencies": {

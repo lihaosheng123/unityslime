@@ -916,7 +916,9 @@ namespace Slime
                     var slime = _slimeInstances[i];
                     if (!slime.Active) continue;
                     Gizmos.DrawWireSphere(slime.Center * PBF_Utils.Scale, slime.Radius * PBF_Utils.Scale);
+#if UNITY_EDITOR
                     UnityEditor.Handles.Label(slime.Center * PBF_Utils.Scale, $"id:{i}");
+#endif
                     if (_connect)
                         Gizmos.DrawLine(slime.Center * PBF_Utils.Scale + new float3(0, 0.1f, 0), trans.position + new Vector3(0, 0.1f, 0));
                 }

@@ -32,7 +32,7 @@ namespace Slime
     public static class PBF_Utils
     {
         // 基础尺寸/数量设置
-        public const int Width = 16;                      // 初始体素立方宽度
+        public const int Width = 10;                      // 初始体素立方宽度
         public const int Num = Width * Width * Width / 2; // 粒子总数 (占半个体积)
         public const int BubblesCount = 2048;             // 气泡池大小
         public const float PredictStep = 0.02f;           // 半步预测 (粒子位置更新步长)
