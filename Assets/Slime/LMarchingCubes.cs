@@ -1,5 +1,4 @@
-﻿#if UNITY_EDITOR
-using System.Linq;
+﻿using System.Linq;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -897,4 +896,3 @@ namespace Slime
         };
     }
 }
-#endif
