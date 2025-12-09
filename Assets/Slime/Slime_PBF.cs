@@ -930,5 +930,198 @@ namespace Slime
                 }
             }
         }
+        
+        #region Public API for Particle Control
+        
+        /// <summary>
+        /// 给指定粒子施加外部速度（用于发射）
+        /// </summary>
+        public void ApplyVelocityToParticles(int[] particleIndices, float3 velocity)
+        {
+            if (!_velocityBuffer.IsCreated || particleIndices == null)
+                return;
+                
+            foreach (int idx in particleIndices)
+            {
+                if (idx >= 0 && idx < _velocityBuffer.Length)
+                {
+                    _velocityBuffer[idx] = velocity;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 获取距离指定世界位置最近的N个粒子索引
+        /// </summary>
+        public int[] GetNearestParticles(Vector3 worldPos, int count)
+        {
+            if (!_particles.IsCreated || count <= 0)
+                return new int[0];
+                
+            float3 pos = (float3)worldPos * PBF_Utils.InvScale;
+            
+            // 简单距离排序（可以优化为基于网格的查询）
+            var distances = new List<(int index, float distSq)>();
+            
+            for (int i = 0; i < _particles.Length; i++)
+            {
+                float distSq = math.lengthsq(_particles[i].Position - pos);
+                distances.Add((i, distSq));
+            }
+            
+            distances.Sort((a, b) => a.distSq.CompareTo(b.distSq));
+            
+            int resultCount = Mathf.Min(count, distances.Count);
+            int[] result = new int[resultCount];
+            for (int i = 0; i < resultCount; i++)
+            {
+                result[i] = distances[i].index;
+            }
+            
+            return result;
+        }
+        
+        /// <summary>
+        /// 获取指定控制器ID内的粒子索引
+        /// </summary>
+        public int[] GetParticlesInController(int controllerID, int maxCount = -1)
+        {
+            if (!_particles.IsCreated)
+                return new int[0];
+                
+            var result = new List<int>();
+            
+            for (int i = 0; i < _particles.Length; i++)
+            {
+                if (_particles[i].ID == controllerID)
+                {
+                    result.Add(i);
+                    if (maxCount > 0 && result.Count >= maxCount)
+                        break;
+                }
+            }
+            
+            return result.ToArray();
+        }
+        
+        /// <summary>
+        /// 设置粒子的目标控制器ID
+        /// </summary>
+        public void SetParticleController(int[] particleIndices, int controllerID)
+        {
+            if (!_particles.IsCreated || particleIndices == null)
+                return;
+                
+            foreach (int idx in particleIndices)
+            {
+                if (idx >= 0 && idx < _particles.Length)
+                {
+                    var p = _particles[idx];
+                    p.ID = controllerID;
+                    _particles[idx] = p;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 在指定位置创建新的控制器
+        /// </summary>
+        public int CreateControllerAtPosition(Vector3 worldPos, float radius = 2f)
+        {
+            float3 pos = (float3)worldPos * PBF_Utils.InvScale;
+            
+            _controllerBuffer.Add(new ParticleController
+            {
+                Center = pos,
+                Radius = radius,
+                Velocity = float3.zero,
+                Concentration = concentration,
+            });
+            
+            return _controllerBuffer.Length - 1;
+        }
+        
+        /// <summary>
+        /// 获取当前控制的实例ID
+        /// </summary>
+        public int GetControlledInstanceID()
+        {
+            return _controlledInstance;
+        }
+        
+        /// <summary>
+        /// 切换到指定的史莱姆实例
+        /// </summary>
+        public void SwitchToInstance(int instanceID)
+        {
+            if (instanceID >= 0 && instanceID < _slimeInstances.Length && _slimeInstances[instanceID].Active)
+            {
+                _controlledInstance = instanceID;
+                trans.position = _slimeInstances[instanceID].Center * PBF_Utils.Scale;
+                
+                if (showDebugInfo)
+                {
+                    Debug.Log($"[Slime_PBF] 切换控制到实例 {instanceID}");
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 统计指定区域内的粒子数量
+        /// </summary>
+        public int CountParticlesInSphere(Vector3 worldCenter, float worldRadius)
+        {
+            if (!_particles.IsCreated)
+                return 0;
+                
+            float3 center = (float3)worldCenter * PBF_Utils.InvScale;
+            float radius = worldRadius * PBF_Utils.InvScale;
+            float radiusSq = radius * radius;
+            int count = 0;
+            
+            for (int i = 0; i < _particles.Length; i++)
+            {
+                if (math.lengthsq(_particles[i].Position - center) <= radiusSq)
+                {
+                    count++;
+                }
+            }
+            
+            return count;
+        }
+        
+        /// <summary>
+        /// 获取所有史莱姆实例的信息（用于选择切换目标）
+        /// </summary>
+        public (int id, Vector3 position, int particleCount, bool active)[] GetAllSlimeInstances()
+        {
+            if (!_slimeInstances.IsCreated)
+                return new (int, Vector3, int, bool)[0];
+                
+            var result = new List<(int, Vector3, int, bool)>();
+            
+            for (int i = 0; i < _slimeInstances.Length; i++)
+            {
+                var slime = _slimeInstances[i];
+                if (!slime.Active)
+                    continue;
+                    
+                // 统计该实例的粒子数
+                int particleCount = 0;
+                for (int j = 0; j < _particles.Length; j++)
+                {
+                    if (_particles[j].ID == slime.ControllerID)
+                        particleCount++;
+                }
+                
+                result.Add((i, slime.Center * PBF_Utils.Scale, particleCount, slime.Active));
+            }
+            
+            return result.ToArray();
+        }
+        
+        private bool showDebugInfo = false; // 添加调试开关
+        
+        #endregion
     }
 }
