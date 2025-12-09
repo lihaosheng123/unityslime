@@ -1042,6 +1042,24 @@ namespace Slime
         }
         
         /// <summary>
+        /// 在指定位置创建新的控制器（可自定义浓度）
+        /// </summary>
+        public int CreateControllerAtPosition(Vector3 worldPos, float radius = 2f, float customConcentration = -1f)
+        {
+            float3 pos = (float3)worldPos * PBF_Utils.InvScale;
+            
+            _controllerBuffer.Add(new ParticleController
+            {
+                Center = pos,
+                Radius = radius,
+                Velocity = float3.zero,
+                Concentration = customConcentration < 0 ? concentration : customConcentration,
+            });
+            
+            return _controllerBuffer.Length - 1;
+        }
+        
+        /// <summary>
         /// 获取当前控制的实例ID
         /// </summary>
         public int GetControlledInstanceID()

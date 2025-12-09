@@ -948,12 +948,11 @@ MonoBehaviour:
   targetCheckRadius: 2
   switchControlKey: 9
   showShootDebug: 1
-  velocityMultiplier: 3
+  velocityMultiplier: 15
   useImpulseMode: 1
-  impulseStrength: 10
-  reduceConcentrationDuringShooting: 1
-  shootingConcentration: 0.5
-  concentrationRestoreTime: 2
+  impulseStrength: 50
+  maintainOriginalShape: 1
+  transitionConcentration: 0.1
 --- !u!114 &749757898
 MonoBehaviour:
   m_ObjectHideFlags: 0
