@@ -472,7 +472,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 288279426}
-  - component: {fileID: 288279425}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -480,47 +479,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &288279425
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 288279424}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 571dda95d0e9b3f4bb89e589e5a1b78c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bubbleSpeed: 0.1
-  viscosityStrength: 10
-  concentration: 30
-  gravity: -5
-  threshold: 2
-  useAnisotropic: 0
-  colliderSearchMode: 2
-  colliderTag: Ground
-  faceMesh: {fileID: -2432090755550338912, guid: a2636e28e0a71644a8eadcaf7806d5db,
-    type: 3}
-  faceMat: {fileID: 2100000, guid: 82795d66cd3acd74cab3e6f40474ac9e, type: 2}
-  mat: {fileID: 2100000, guid: 60d726e7a1210884e985e63983581d30, type: 2}
-  particleMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-  particleMat: {fileID: 2100000, guid: 4e01afce185c2ac44a725af23a4255a1, type: 2}
-  bubblesMat: {fileID: 2100000, guid: ce752de8464cea54b9724b7da5a541b6, type: 2}
-  trans: {fileID: 749757894}
-  renderMode: 1
-  blockNum: 0
-  bubblesNum: 0
-  minPos:
-    x: 0
-    y: 0
-    z: 0
-  maxPos:
-    x: 0
-    y: 0
-    z: 0
-  gridDebug: 0
-  componentDebug: 1
 --- !u!4 &288279426
 Transform:
   m_ObjectHideFlags: 0
@@ -1055,118 +1013,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 539261777}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &654060821
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 654060825}
-  - component: {fileID: 654060824}
-  - component: {fileID: 654060823}
-  - component: {fileID: 654060822}
-  m_Layer: 0
-  m_Name: Sphere (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!135 &654060822
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 654060821}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!23 &654060823
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 654060821}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: a0571a34f741ce74f843b6ca468f37b8, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &654060824
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 654060821}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &654060825
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 654060821}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.205, y: 0.986, z: 3.497}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &686369495
 GameObject:
   m_ObjectHideFlags: 0
@@ -1231,6 +1077,7 @@ GameObject:
   - component: {fileID: 749757895}
   - component: {fileID: 749757896}
   - component: {fileID: 749757897}
+  - component: {fileID: 749757898}
   m_Layer: 0
   m_Name: palyer
   m_TagString: Untagged
@@ -1372,10 +1219,74 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 1
   jumpForce: 4
+<<<<<<< HEAD
   groundLayer:
     serializedVersion: 2
     m_Bits: 4294967295
   groundCheckDistance: 0.3
+=======
+  groundCheckOffset: 0.1
+  groundCheckDistance: 1
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  slimePBF: {fileID: 749757898}
+  shootKey: 323
+  launchSpeed: 5
+  arcHeight: 2
+  particlesPerBatch: 10
+  launchInterval: 0.1
+  minParticlesForSwitch: 50
+  targetCheckRadius: 2
+  switchControlKey: 9
+  showShootDebug: 1
+  velocityMultiplier: 15
+  useImpulseMode: 1
+  impulseStrength: 50
+  maintainOriginalShape: 1
+  transitionConcentration: 0.1
+--- !u!114 &749757898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 749757890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 571dda95d0e9b3f4bb89e589e5a1b78c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bubbleSpeed: 0.1
+  viscosityStrength: 10
+  concentration: 15
+  gravity: -5
+  threshold: 2
+  useAnisotropic: 0
+  colliderSearchMode: 2
+  colliderTag: Ground
+  faceMesh: {fileID: -2432090755550338912, guid: a2636e28e0a71644a8eadcaf7806d5db,
+    type: 3}
+  faceMat: {fileID: 2100000, guid: 82795d66cd3acd74cab3e6f40474ac9e, type: 2}
+  mat: {fileID: 2100000, guid: 60d726e7a1210884e985e63983581d30, type: 2}
+  particleMesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  particleMat: {fileID: 2100000, guid: 4e01afce185c2ac44a725af23a4255a1, type: 2}
+  bubblesMat: {fileID: 2100000, guid: ce752de8464cea54b9724b7da5a541b6, type: 2}
+  trans: {fileID: 749757894}
+  renderMode: 1
+  blockNum: 0
+  bubblesNum: 0
+  minPos:
+    x: 0
+    y: 0
+    z: 0
+  maxPos:
+    x: 0
+    y: 0
+    z: 0
+  gridDebug: 0
+  componentDebug: 1
+>>>>>>> 5abb72d8189e8fdcf07b2d87fbf4b0b9c77edee9
 --- !u!1 &1160352577
 GameObject:
   m_ObjectHideFlags: 0
@@ -1661,6 +1572,7 @@ MonoBehaviour:
     m_ContrastAdaptiveSharpening: 0
 <<<<<<< HEAD
   m_Version: 2
+<<<<<<< HEAD
 =======
 --- !u!114 &1430939061
 MonoBehaviour:
@@ -1995,6 +1907,8 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+=======
+>>>>>>> 5abb72d8189e8fdcf07b2d87fbf4b0b9c77edee9
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2004,8 +1918,6 @@ SceneRoots:
   - {fileID: 398234645}
   - {fileID: 288279426}
   - {fileID: 749757894}
-  - {fileID: 654060825}
-  - {fileID: 1468818506}
   - {fileID: 686369497}
   - {fileID: 1409293806}
   - {fileID: 276784883}

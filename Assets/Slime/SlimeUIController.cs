@@ -1,10 +1,15 @@
+<<<<<<< HEAD
 using UnityEngine;
+=======
+﻿using UnityEngine;
+>>>>>>> 5abb72d8189e8fdcf07b2d87fbf4b0b9c77edee9
 using UnityEngine.UI;
 
 namespace Slime
 {
     public class SlimeUIController : MonoBehaviour
     {
+<<<<<<< HEAD
         [SerializeField] private Button jumpButton;
         [SerializeField] private ControllerTest slimeController;
 
@@ -37,5 +42,8 @@ namespace Slime
                 jumpButton.onClick.RemoveListener(OnJumpButtonClick);
             }
         }
+=======
+        // 按钮跳跃功能已移除
+>>>>>>> 5abb72d8189e8fdcf07b2d87fbf4b0b9c77edee9
     }
 }
